@@ -85,6 +85,7 @@ int main(){
             break;
         case 7:
             Delete_Stack(S);
+            break;
         case 12:
             printf("Here is your Stack\n\n");
             Display(S);
@@ -147,18 +148,15 @@ int Pop(Stack*S){
 }
 
 void Delete_Stack(Stack*S){
-    if (S){
-        if (S->arr){
-            free(S->arr);
-        }
-        free(S);
-        printf("Stack deleted with Success\n\n");
-    }
-    else
-    {
-        printf("Stack is not Deleted\n\n");
+    if(S==NULL){
+        printf("Stack is already NULL\n\n");
         return;
     }
+    free(S->arr);
+    S->arr=NULL;
+    S->top=-1;
+    printf("You deleted all elements in Stack\n\n");
+    free(S);
 }
 
 int Top(Stack*S){
@@ -173,7 +171,7 @@ int Size_Stack(Stack*S){
 }
 
 void Display(Stack*S){
-    if (isStackEmpty(S))
+    if (isStackEmpty(S)||S==NULL)
     {
         printf("There nothing Display because Stack is empty\n");
         return;
