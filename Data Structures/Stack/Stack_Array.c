@@ -22,16 +22,20 @@ void Delete_Stack(Stack*S);
 int Top(Stack*S);
 int Size_Stack(Stack*S);
 void Display(Stack*S);
+int Binary_Search(Stack*S, int value,int low ,int high, bool sort_con);
+void merge(int *arr, int low , int mid ,int high);
+void mergeSort(int *arr, int left ,int right);
 
 
 int main(){
     Stack*S=CreateStack();
-    int choice,push_val;
+    int choice,push_val,search_val,searchTemp;
     bool con=true;
+    bool sort_con = false;
 
     do
     {   
-        printf("----------WELCOME TO ARRAY STACK----------- \n");
+        printf("----------WELCOME TO ARRAY STACK------ \n");
         printf("---------- Push element into Stack - 1\n");
         printf("---------- Pop element from Stack  - 2\n");
         printf("---------- Top element of Stack    - 3\n");
@@ -85,6 +89,26 @@ int main(){
             break;
         case 7:
             Delete_Stack(S);
+            break;
+        case 8:
+            printf("Enter the Element you want to search in Stack ");
+            scanf("%d",&search_val);
+            printf("\n");
+            searchTemp=Search(S,search_val,0,S->top,sort_con);
+            if (searchTemp == -1 )
+            {
+                printf("the Element you are looking is not in the Stack SORRY!!1\n\n");
+            }
+            else
+            {
+                printf("the Value you entered is at index %d\n\n",searchTemp);
+            }
+            break;
+        case 11:
+            printf("Here is your sorted Stack\n");
+            mergeSort(S->arr,0,S->top);
+            Display(S);
+            sort_con=true;
             break;
         case 12:
             printf("Here is your Stack\n\n");
@@ -178,13 +202,63 @@ void Display(Stack*S){
     }
     else
     {
-        for (int i = S->top; i>-1; i--)
+        for (int i = S->top+3; i>-1; i--)
         {
             printf("[%d]\n",S->arr[i]);
         }
         printf("Down of Stack\n");
     }
     printf("\n\n");
+}
+
+int Binary_Search(Stack*S, int value,int low, int high, bool search_con){
+    if (search_con == true){
+
+    }else{
+        while (low<=high)
+        {
+            int mid =low+(high-low)/2;
+            if (value==S->arr[mid]) return mid;
+            if (value>S->arr[mid]) low = mid+1;
+            else high = mid-1;
+        }
+        return -1;
+    }    
+}
+
+void merge(int *arr, int left ,int mid ,int right){
+    int l1 = mid - left+1;
+    int l2 = right-mid;
+
+    printf("merge: left = %d, mid = %d, right = %d, l1 = %d, l2 = %d\n\n",left ,mid , right ,l1 , l2);
+    // dynamically allocate to track the merge for the subarrays 
+    int *arrLeft =(int *)malloc(l1*sizeof(int));
+    int *arrRight = (int *)malloc(l2*sizeof(int));
+
+    for(int i=0 ; i < l1;i++) arrLeft[i] = arr[left + i];
+    for(int j=0 ; j < l2;j++) arrRight[j] = arr[mid + 1 + j];
+
+    int i=0, j=0, k=left;
+    while (i<l1 && j<l2)
+    {
+        if (arrLeft[i]<=arrRight[j]) arr[k++]= arrLeft[i++];
+        else arr[k++]= arrRight[j++];
+        
+    }
+    while (i<l1) arr[k++] = arrLeft[i++];
+    while (j<l2) arr[k++] = arrRight[j++];
+
+    free(arrLeft);
+    free(arrRight);
+}
+
+void mergeSort(int *arr, int left , int right){
+    if (left < right){
+        int mid = left + (right - left)/2;
+        mergeSort(arr,left,mid);
+        mergeSort(arr,mid+ 1, right);
+        merge(arr,left ,mid , right);
+    }    
 }
 
 

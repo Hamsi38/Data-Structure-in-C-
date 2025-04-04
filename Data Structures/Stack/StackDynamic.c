@@ -1,7 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+
+typedef struct StackDynamic
+{
+    int top;
+    int capacity;
+    int* arr;
+}StackDynamic;
+
+
 
 int main(){
-    printf("i just change a few things\n");
+
+
     return 0;
 }
