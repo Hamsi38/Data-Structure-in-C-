@@ -16,22 +16,29 @@ typedef struct Stack
 Stack*CreateStack();
 int isStackEmpty(Stack*S);
 int isStackFull(Stack*S);
-void Push(Stack*S,int data);
-int Pop(Stack*S);
+void Push(Stack*S, int data, int *minStack, int *maxStack, int *minTop, int* maxTop);
+int Pop(Stack*S, int *minStack, int *maxStack, int *minTop, int *maxTop);
 void Delete_Stack(Stack*S);
 int Top(Stack*S);
 int Size_Stack(Stack*S);
 void Display(Stack*S);
-int Binary_Search(Stack*S, int value,int low ,int high, bool sort_con);
+int Binary_Search(Stack*S, int value,int low ,int high);
 void merge(int *arr, int low , int mid ,int high);
 void mergeSort(int *arr, int left ,int right);
+void Reverse(Stack*S);
+int Max_Stack_Top(int *maxStack, int maxTop);
+int Min_Stack_Top(int *minStack, int minTop);
 
 
-int main(){
+int main(int argc, char *argv[]){
     Stack*S=CreateStack();
     int choice,push_val,search_val,searchTemp;
     bool con=true;
-    bool sort_con = false;
+    int minStack[MAXSIZE];
+    int maxStack[MAXSIZE];
+    int minTop = -1;
+    int maxTop = -1;
+
 
     do
     {   
@@ -58,10 +65,10 @@ int main(){
         case 1:
             printf("Enter the Value you want to push into Stack ");
             scanf("%d",&push_val);
-            Push(S,push_val);
+            Push(S, push_val , minStack, maxStack, &minTop, &maxTop);
             break;
         case 2:
-            printf("the Value you popped is %d\n\n",Pop(S));
+            printf("the Value you popped is %d\n\n",Pop(S ,minStack ,maxStack ,&minTop, &maxTop));
             break;
         case 3:
             printf("Top of the Stack is %d\n\n",Top(S));
@@ -94,21 +101,32 @@ int main(){
             printf("Enter the Element you want to search in Stack ");
             scanf("%d",&search_val);
             printf("\n");
-            searchTemp=Search(S,search_val,0,S->top,sort_con);
+            searchTemp=Binary_Search(S,search_val ,0 ,S->top);
             if (searchTemp == -1 )
             {
-                printf("the Element you are looking is not in the Stack SORRY!!1\n\n");
+                printf("the Element you are looking is not in the Stack SORRY!!!\n\n");
             }
             else
             {
                 printf("the Value you entered is at index %d\n\n",searchTemp);
             }
             break;
+        case 9:
+            printf("Here is your Stack before Reversing\n");
+            Display(S);
+            printf("\n");
+            Reverse(S);
+            Display(S);
+            break;
+        case 10:
+            printf("Here is your Max and Min Numbers in Stack\n");
+            printf("Current Max Number %d\n",Max_Stack_Top(maxStack, maxTop));
+            printf("Current Min Number %d\n\n",Min_Stack_Top(minStack, minTop));
+            break;
         case 11:
             printf("Here is your sorted Stack\n");
             mergeSort(S->arr,0,S->top);
             Display(S);
-            sort_con=true;
             break;
         case 12:
             printf("Here is your Stack\n\n");
@@ -153,22 +171,40 @@ int isStackFull(Stack*S){
     return (S->top==S->capacity-1);// if condition is true return 1 or false return 0
 }
 
-void Push(Stack*S,int data){
+void Push(Stack*S,int data, int *minStack, int *maxStack , int *minTop, int* maxTop){
     if (isStackFull(S)){
         printf("Stack is overflow\n\n");
         return;
     }
         S->arr[++S->top]=data;
+        //*for better time complexity i made like this if you want  you can ma ke linear search in Stack array but O(n) time 
+        if(*minTop == -1 || data <= minStack[*minTop]){//! it is not gonna update the minTop and maxTop because they are local variables here we are derefrecing here with pointer update the integers 
+            minStack[++(*minTop)]=data;
+        }
+        if (*maxTop == -1 || data >= maxStack[*maxTop]){
+            maxStack[++(*maxTop)]=data;
+        }
+        
         printf("Pushed with Success %d\n\n",data);
 }
 
-int Pop(Stack*S){
+int Pop(Stack*S, int * minStack, int *maxStack, int *minTop, int* maxTop){
     if (isStackEmpty(S))
     {
         printf("Stack is Empty you can't push\n\n");
         return INT_MIN;
     }
-    return S->arr[S->top--];
+
+    int popped = S->arr[S->top--];
+
+    if (S->arr[S->top] ==maxStack[(*maxTop)]){
+        (*maxTop)--;
+    }
+    if (S->arr[S->top] ==minStack[(*minTop)]){
+        (*minTop)--;
+    }
+    
+    return popped;
 }
 
 void Delete_Stack(Stack*S){
@@ -202,7 +238,7 @@ void Display(Stack*S){
     }
     else
     {
-        for (int i = S->top+3; i>-1; i--)
+        for (int i = S->top; i>-1; i--)
         {
             printf("[%d]\n",S->arr[i]);
         }
@@ -211,19 +247,15 @@ void Display(Stack*S){
     printf("\n\n");
 }
 
-int Binary_Search(Stack*S, int value,int low, int high, bool search_con){
-    if (search_con == true){
-
-    }else{
-        while (low<=high)
-        {
-            int mid =low+(high-low)/2;
-            if (value==S->arr[mid]) return mid;
-            if (value>S->arr[mid]) low = mid+1;
-            else high = mid-1;
-        }
-        return -1;
-    }    
+int Binary_Search(Stack*S, int value,int low, int high){
+    while (low<=high)
+    {
+        int mid =low+(high-low)/2;
+        if (value==S->arr[mid]) return mid;
+        if (value>S->arr[mid]) low = mid+1;
+        else high = mid-1;
+    }
+    return -1;    
 }
 
 void merge(int *arr, int left ,int mid ,int right){
@@ -259,6 +291,40 @@ void mergeSort(int *arr, int left , int right){
         mergeSort(arr,mid+ 1, right);
         merge(arr,left ,mid , right);
     }    
+}
+
+void Reverse(Stack*S){
+    int *stk = (int*)malloc((S->top + 1) * sizeof(int));
+    if (stk == NULL){
+        printf("Memory allocation failed for reversing the stack\n\n");
+        return;
+    }
+
+    int j = 0;
+    for (int i = S->top; i >= 0; i--){
+        stk[j++] = S->arr[i];
+    }
+
+    for (int i = 0; i <= S->top; i++){
+        S->arr[i] = stk[i];
+    }
+
+    free(stk);
+    printf("Stack reversed successfully\n\n");
+}
+
+int Min_Stack_Top(int *minStack, int mintop){
+    if(mintop == -1){
+        return -1;
+    }
+    return minStack[mintop];
+}
+
+int Max_Stack_Top(int *maxStack, int maxtop){
+    if (maxtop == -1 ){
+        return -1;
+    }
+    return maxStack[maxtop];
 }
 
 
