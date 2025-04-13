@@ -1,17 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(){
 
-
-    int size=10;
-    char*arr=(char*)malloc(size*sizeof(char));
-    if (arr==NULL)
-    {
-        printf("failed\n");
-        return 1;
+int main(void){
+    FILE*fp = fopen("fred.txt", "r");
+    if(fp == NULL){
+        printf("cannot open fred.txt \n\n",stderr);
+        return EXIT_FAILURE;
     }
-    
     
 
     return 0;

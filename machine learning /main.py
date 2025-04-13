@@ -1,10 +1,27 @@
+import tkinter as tk
+from tkinter import messagebox
 
-import ccxt
+# Function to be called when button is clicked
+def greet():
+    name = entry.get()
+    messagebox.showinfo("Greeting", f"Hello, {name}!")
 
-# Initialize Binance API
-exchange = ccxt.binance()
+# Create the main window
+root = tk.Tk()
+root.title("Greeting App")
+root.geometry("300x150")
 
-# Fetch BTC/USDT price
-ticker = exchange.fetch_ticker("BTC/USDT")
-print(f"Bitcoin Price: {ticker['last']} USDT")
+# Add a label
+label = tk.Label(root, text="Enter your name:")
+label.pack(pady=10)
 
+# Add an entry box
+entry = tk.Entry(root)
+entry.pack()
+
+# Add a button
+button = tk.Button(root, text="Greet Me", command=greet)
+button.pack(pady=10)
+
+# Run the application
+root.mainloop()

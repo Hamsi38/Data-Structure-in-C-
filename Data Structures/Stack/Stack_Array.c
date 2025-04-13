@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
             printf("Top of the Stack is %d\n\n",Top(S));
             break;
         case 4:
-            if (isStackEmpty(S)==-1)
+            if (isStackEmpty(S))
             {
                 printf("Stack is empty\n\n");
             }else
