@@ -3,9 +3,6 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#define MAX 100
-#define MIN 100 
-
 typedef struct Stack
 {
     int top;
@@ -42,7 +39,7 @@ void Reverse_Stack(Stack*S);
 void Insert_Bottom(Stack*S, int data);
 
 void Push_2(Stack*S, Min_Max*N,int data);
-void Pop_2(Stack*S, Min_Max*N);
+void Pop_2(Stack*S, Min_Max*N, int data);
 
 Min_Max*Create_Min_Max();
 
@@ -62,8 +59,7 @@ int main(){
 
     int choice, push_value, binary_search;
     bool end_program = true;
-    int push_con = IS_FULL(S);
-    int binary;
+    int binary, Popped_value;
 
     do
     {
@@ -82,9 +78,14 @@ int main(){
         printf("----- DISPLAY - 12 -------\n");
         printf("-------- EXIT - 0 --------\n");
         printf("ENTER YOUR CHOICE HERE ");
-        scanf("%d",&choice);
+        if(scanf("%d", &choice != 1)){
+            printf("Invalid input! Please enter a valid number\n\n");
+            //clear the input buffer
+            while(getchar != '\n');
+            continue;
+        }
         printf("\n");
-
+        
         switch (choice)
         {
         case  1:
@@ -94,8 +95,9 @@ int main(){
             Push_2(S,Min,push_value);
             break;
         case 2:
-            printf("You popped number --> %d\n\n",Pop(S));
-            Pop_2(S,Min);
+            Popped_value = Pop(S);
+            printf("You popped number --> %d\n\n",Popped_value);
+            Pop_2(S,Min, Popped_value);
             break;
         case 3:
             printf("Top of Stack --> %d\n\n",Top(S));
@@ -108,7 +110,7 @@ int main(){
             }
             break;
         case 5:
-            if(push_con){
+            if(IS_FULL(S)){
                 printf("SORRY for now STACK IS FULL\n\n");
             }else{
                 printf("STACK is not full \n\n");
@@ -125,7 +127,7 @@ int main(){
             printf("Enter the value you want yo search in Stack -->");
             scanf("%d",&binary_search);
             Merge_Sort(S->arr, 0 , S->top);
-            binary = Binary_Search(S,0 ,S->top,binary_search);
+            binary = Binary_Search(S,0 ,S->top-1,binary_search);
             if (binary == -1){
                 printf("SORRY the value you are looking is not in Stack\n\n");
             }else{
@@ -140,16 +142,25 @@ int main(){
             Display(S);
             break;
         case 10:
-            printf("Minim and Maxim Values in Stack \n");
-            printf("Min = %d\n",Min_top(Min));
-            printf("Maxim = %d\n\n",Max_Top(Min));
+            if(Min->Min_Top == -1){
+                printf("Minim and Maxim values in Stack are not available (stack is empty)\n\n");
+            }
+            else{
+                printf("Minim and Maxim Values in Stack \n");
+                printf("Min = %d\n",Min_top(Min));
+                printf("Maxim = %d\n\n",Max_Top(Min));
+            }
             break;
         case 11:
-            printf("YOUR UNSORTED STACK IS HERE \n");
-            Display(S);
-            printf("Here is YOUR SORTED STACK \n");
-            Merge_Sort(S->arr , 0 , S->top );
-            Display(S);
+            if (IS_EMPTY(S)) {
+                printf("Stack is empty; sorting is not possible.\n\n");
+            } else {
+                printf("YOUR UNSORTED STACK IS HERE \n");
+                Display(S);
+                printf("Here is YOUR SORTED STACK \n");
+                Merge_Sort(S->arr, 0, S->top);
+                Display(S);
+            }
             break;
         case 12:
             printf("Here is your Stack \n");
@@ -157,6 +168,9 @@ int main(){
             break;
         case 0:
             printf("THANKS FOR USING MY CODE \n\n");
+            printf("Freeing allocated memory\n\n");
+            Free_Stack(S);
+            Free_Min_Max(Min);
             end_program = false;
             break;
         default:
@@ -193,13 +207,13 @@ void Push(Stack*S, int data){
 }
 
 void Double_Size(Stack*S){
+    S->capacity *=2;
     int *new_arr=realloc(S->arr,S->capacity*sizeof(int));
     if(!new_arr){
         printf("Memory allocation failed\n\n");
         return;
     }
     S->arr=new_arr;
-    S->capacity *=2;
 }
 
 int IS_FULL(Stack* S) {
@@ -298,7 +312,7 @@ void Merge(int * arr, int left, int mid , int right){
   // When we run out of elements in either L or M,
   // pick up the remaining elements and put in A[p..r]
     while(i<l1) arr[k++] = L1[i++];
-    while (i<l2) arr[k++] = L2[j++];
+    while (j<l2) arr[k++] = L2[j++];
     
     free(L1);
     free(L2);
@@ -363,7 +377,7 @@ Min_Max * Create_Min_Max(){
 
     return Min;
 }
-
+//! min functions here 
 void Min_Push(Min_Max*Min, int data){
     if(Min->Min_Top == -1 || Min->Min_Array[Min->Min_Top]> data){
         if(Min->Min_Top == Min->Max_Capacity ){
@@ -374,12 +388,14 @@ void Min_Push(Min_Max*Min, int data){
 }
 
 void Double_Min(Min_Max*Min){
+    Min->Min_Capacity *=2;
     int*arr_min = realloc(Min->Min_Array, Min->Min_Capacity*sizeof(int));
     if (!arr_min){
         printf("Memory Allocation Failed!!\n\n");
+        Min->Min_Capacity /=2;
+        return;
     }
     Min->Min_Array = arr_min;
-    Min->Min_Capacity *=2;
 }
 
 int Min_Pop(Min_Max*Min){
@@ -399,7 +415,7 @@ int Min_top(Min_Max*Min){
     return Min->Min_Array[Min->Min_Top];
 }
 
-
+//! max functions here
 void Max_Push(Min_Max*Max, int data){
     if(Max->Max_Top == -1 || Max->Max_Array[Max->Max_Top]< data){
         if(Max->Max_Top == Max->Max_Capacity){
@@ -410,13 +426,14 @@ void Max_Push(Min_Max*Max, int data){
 }
 
 void Double_Max(Min_Max*Max){
+    Max->Max_Capacity *=2;
     int*arr_max = realloc(Max->Max_Array,Max->Max_Capacity*sizeof(int));
     if(!arr_max){
         printf("Memory allocation failed!!!\n\n");
+        Max->Max_Capacity /=2;
         return;
     }
     Max->Max_Array = arr_max;
-    Max->Max_Capacity *=2;
 }
 
 int Max_Pop(Min_Max*Max){
@@ -424,7 +441,7 @@ int Max_Pop(Min_Max*Max){
         printf("stack is empty \n\n");
         return INT_MIN;
     }
-    return Max->Max_Array[Max->Max_Top];
+    return Max->Max_Array[Max->Max_Top--];
 }
 
 int Max_Top(Min_Max*Max){
@@ -441,11 +458,27 @@ void Push_2(Stack*S, Min_Max*N, int data){
     Max_Push(N,data);
 }
 
-void Pop_2(Stack*S, Min_Max*N){
-    if(Pop(S) == Min_top(N)){
-        Min_Pop(N);
+void Pop_2(Stack*S, Min_Max*N, int data){
+    if(!IS_EMPTY(S)){
+        if(data == Min_top(N)){
+            Min_Pop(N);
+        }
+        if(data== Max_Top(N)){
+            Max_Pop(N);
+        }
+    }else{
+        printf("Stack is empty there is no min max value!!!\n\n");
+        return;
     }
-    if(Pop(S) == Max_Top(N)){
-        Max_Pop(N);
-    }
+}
+
+void Free_Stack(Stack*S){
+    free(S->arr);
+    free(S);
+}
+
+void Free_Min_Max(Min_Max*Min){
+    free(Min->Min_Array);
+    free(Min->Max_Array);
+    free(Min);
 }
