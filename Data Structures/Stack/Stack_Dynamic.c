@@ -61,6 +61,7 @@ int Max_Pop(Min_Max*Max);
 int Max_Top(Min_Max*Max);
 
 bool parse_int(char*string, int*integer);
+void clear_input_buffer();
 
 int main(void){
     Stack*S=Create();
@@ -70,12 +71,11 @@ int main(void){
     int choice, push_value, binary_search;
     bool end_program = true;
     int binary, Popped_value;
-    int integer=0; 
-
-
 
     do
     {
+        //
+        int integer=0;//Sometimes integer might still hold a value from the previous loop.
         printf("-----------MENU-----------\n");
         printf("------- PUSH - 1 ---------\n");
         printf("--------- POP - 2 --------\n");
@@ -91,7 +91,10 @@ int main(void){
         printf("----- DISPLAY - 12 -------\n");
         printf("-------- EXIT - 0 --------\n");
         printf("ENTER YOUR CHOICE HERE ");
-
+        /*
+        scanf leaves  new lien buffer because of that  
+        in any switch case where is scanf it is gonna enter ht else part 
+        */ 
         fgets(buffer,BUFFER_SIZE,stdin);
         buffer[strcspn(buffer,"\n")] = '\0';
         if(parse_int(buffer,&integer)){
@@ -99,7 +102,8 @@ int main(void){
         {
             case  1:
                 printf("Value you want to push enter here --> ");
-                scanf("%d",&push_value);
+                scanf("%d",&push_value);// leaves \n in input buffer
+                clear_input_buffer();
                 printf("\n");
                 Push_2(S,Min,push_value);
                 break;
@@ -135,6 +139,7 @@ int main(void){
             case 8:
                 printf("Enter the value you want yo search in Stack -->");
                 scanf("%d",&binary_search);
+                clear_input_buffer();
                 Merge_Sort(S->arr, 0 , S->top);
                 binary = Binary_Search(S,0 ,S->top-1,binary_search);
                 if (binary == -1){
@@ -536,4 +541,7 @@ bool parse_int(char*string, int*integer){
     return true;
 }
 
-
+void clear_input_buffer(){
+    int c;
+    while((c = getchar())!= '\n' && c != EOF);
+}
