@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
+
+#define BUFFER_SIZE 100
 
 typedef struct Stack
 {
@@ -10,7 +14,8 @@ typedef struct Stack
     int* arr;
 }Stack;
 
-//* i created another stacks for tracking Min and Max value space complexity is O(1) very efficient 
+//* Additional stacks are created to efficiently track the minimum and maximum values in the main stack.
+//* This approach ensures constant time complexity (O(1)) for retrieving the minimum and maximum values.
 typedef struct Min_Max{
     int *Min_Array;
     int *Max_Array;
@@ -40,6 +45,8 @@ void Insert_Bottom(Stack*S, int data);
 
 void Push_2(Stack*S, Min_Max*N,int data);
 void Pop_2(Stack*S, Min_Max*N, int data);
+void Free_Stack(Stack*S);
+void Free_Min_Max(Min_Max*Min);
 
 Min_Max*Create_Min_Max();
 
@@ -53,13 +60,19 @@ void Max_Push(Min_Max*Max, int data);
 int Max_Pop(Min_Max*Max);
 int Max_Top(Min_Max*Max);
 
-int main(){
+bool parse_int(char*string, int*integer);
+
+int main(void){
     Stack*S=Create();
     Min_Max*Min= Create_Min_Max();
+    char buffer[BUFFER_SIZE];
 
     int choice, push_value, binary_search;
     bool end_program = true;
     int binary, Popped_value;
+    int integer=0; 
+
+
 
     do
     {
@@ -78,105 +91,105 @@ int main(){
         printf("----- DISPLAY - 12 -------\n");
         printf("-------- EXIT - 0 --------\n");
         printf("ENTER YOUR CHOICE HERE ");
-        if(scanf("%d", &choice != 1)){
-            printf("Invalid input! Please enter a valid number\n\n");
-            //clear the input buffer
-            while(getchar != '\n');
-            continue;
-        }
-        printf("\n");
-        
-        switch (choice)
+
+        fgets(buffer,BUFFER_SIZE,stdin);
+        buffer[strcspn(buffer,"\n")] = '\0';
+        if(parse_int(buffer,&integer)){
+        switch (integer)
         {
-        case  1:
-            printf("Value you want to push enter here --> ");
-            scanf("%d",&push_value);
-            printf("\n");
-            Push_2(S,Min,push_value);
-            break;
-        case 2:
-            Popped_value = Pop(S);
-            printf("You popped number --> %d\n\n",Popped_value);
-            Pop_2(S,Min, Popped_value);
-            break;
-        case 3:
-            printf("Top of Stack --> %d\n\n",Top(S));
-            break;
-        case 4:
-            if (IS_EMPTY(S)){
-                printf("STACK IS EMPTY\n\n");
-            }else{
-                printf("STACK IS NOT EMPTY!!!!!\n\n");
+            case  1:
+                printf("Value you want to push enter here --> ");
+                scanf("%d",&push_value);
+                printf("\n");
+                Push_2(S,Min,push_value);
+                break;
+            case 2:
+                Popped_value = Pop(S);
+                printf("You popped number --> %d\n\n",Popped_value);
+                Pop_2(S,Min, Popped_value);
+                break;
+            case 3:
+                printf("Top of Stack --> %d\n\n",Top(S));
+                break;
+            case 4:
+                if (IS_EMPTY(S)){
+                    printf("STACK IS EMPTY\n\n");
+                }else{
+                    printf("STACK IS NOT EMPTY!!!!!\n\n");
+                }
+                break;
+            case 5:
+                if(IS_FULL(S)){
+                    printf("SORRY for now STACK IS FULL\n\n");
+                }else{
+                    printf("STACK is not full \n\n");
+                }
+                break;
+            case 6:
+                printf("Size of Stack is %d\n\n",Size_Stack(S));
+                break;
+            case 7:
+                Clear_All_Stack(S);
+                printf("ALL STACK IS CLEARED \n\n");
+                break;
+            case 8:
+                printf("Enter the value you want yo search in Stack -->");
+                scanf("%d",&binary_search);
+                Merge_Sort(S->arr, 0 , S->top);
+                binary = Binary_Search(S,0 ,S->top-1,binary_search);
+                if (binary == -1){
+                    printf("SORRY the value you are looking is not in Stack\n\n");
+                }else{
+                    printf("the Value you are looking is at index %d \n\n",binary);
+                }
+                break;
+            case 9:
+                printf("Your stack before reverse\n");
+                Display(S);
+                printf("after reverse\n");
+                Reverse_Stack(S);
+                Display(S);
+                break;
+            case 10:
+                if(Min->Min_Top == -1){
+                    printf("Minim and Maxim values in Stack are not available (stack is empty)\n\n");
+                }
+                else{
+                    printf("Minim and Maxim Values in Stack \n");
+                    printf("Min = %d\n",Min_top(Min));
+                    printf("Maxim = %d\n\n",Max_Top(Min));
+                }
+                break;
+            case 11:
+                if (IS_EMPTY(S)) {
+                    printf("Stack is empty; sorting is not possible.\n\n");
+                } else {
+                    printf("YOUR UNSORTED STACK IS HERE \n");
+                    Display(S);
+                    printf("Here is YOUR SORTED STACK \n");
+                    Merge_Sort(S->arr, 0, S->top);
+                    Display(S);
+                }
+                break;
+            case 12:
+                printf("Here is your Stack \n");
+                Display(S);
+                break;
+            case 0:
+                printf("THANKS FOR USING MY CODE \n\n");
+                printf("Freeing allocated memory\n\n");
+                Free_Stack(S);
+                Free_Min_Max(Min);
+                end_program = false;
+                break;
+            default:
+                printf("PLEASE ENTER A VALID NUMBER and NO STRING!!!\n\n");
+                break;
             }
-            break;
-        case 5:
-            if(IS_FULL(S)){
-                printf("SORRY for now STACK IS FULL\n\n");
-            }else{
-                printf("STACK is not full \n\n");
-            }
-            break;
-        case 6:
-            printf("Size of Stack is %d\n\n",Size_Stack(S));
-            break;
-        case 7:
-            Clear_All_Stack(S);
-            printf("ALL STACK IS CLEARED \n\n");
-            break;
-        case 8:
-            printf("Enter the value you want yo search in Stack -->");
-            scanf("%d",&binary_search);
-            Merge_Sort(S->arr, 0 , S->top);
-            binary = Binary_Search(S,0 ,S->top-1,binary_search);
-            if (binary == -1){
-                printf("SORRY the value you are looking is not in Stack\n\n");
-            }else{
-                printf("the Value you are looking is at index %d \n\n",binary);
-            }
-            break;
-        case 9:
-            printf("Your stack before reverse\n");
-            Display(S);
-            printf("after reverse\n");
-            Reverse_Stack(S);
-            Display(S);
-            break;
-        case 10:
-            if(Min->Min_Top == -1){
-                printf("Minim and Maxim values in Stack are not available (stack is empty)\n\n");
             }
             else{
-                printf("Minim and Maxim Values in Stack \n");
-                printf("Min = %d\n",Min_top(Min));
-                printf("Maxim = %d\n\n",Max_Top(Min));
+                printf("please enter valid number\n");
             }
-            break;
-        case 11:
-            if (IS_EMPTY(S)) {
-                printf("Stack is empty; sorting is not possible.\n\n");
-            } else {
-                printf("YOUR UNSORTED STACK IS HERE \n");
-                Display(S);
-                printf("Here is YOUR SORTED STACK \n");
-                Merge_Sort(S->arr, 0, S->top);
-                Display(S);
-            }
-            break;
-        case 12:
-            printf("Here is your Stack \n");
-            Display(S);
-            break;
-        case 0:
-            printf("THANKS FOR USING MY CODE \n\n");
-            printf("Freeing allocated memory\n\n");
-            Free_Stack(S);
-            Free_Min_Max(Min);
-            end_program = false;
-            break;
-        default:
-            printf("PLEASE ENTER A VALID NUMBER!!!\n\n");
-            break;
-        }
     } while (end_program);
     
     return 0;
@@ -482,3 +495,45 @@ void Free_Min_Max(Min_Max*Min){
     free(Min->Max_Array);
     free(Min);
 }
+
+/**
+ * Parses a string to extract an integer value.
+ * 
+ * @param string The input string to parse.
+ * @param integer A pointer to store the parsed integer value.
+ * @return true if the string is successfully parsed into an integer, false otherwise.
+ */
+bool parse_int(char*string, int*integer){
+
+    int i=0;
+    while(isspace(string[i])) i++;
+    int length = strlen(string);
+    if( length == i) return false;
+
+    char integer_buffer[BUFFER_SIZE];
+    int integer_chars = 0;
+
+    // Check if the number starts with a negative sign
+    if(string[i] == '-'|| string[i]== '+'){
+        integer_buffer[integer_chars++] = string[i++];
+        if(!isdigit(string[i])) return false;
+    }
+    // at least one digit should be present 
+    if(!isdigit(string[i])) return false; 
+    // read digits 
+    while(i<length && !isspace(string[i])){
+        integer_buffer[integer_chars++] = string[i++];
+    }
+
+    integer_buffer[integer_chars] = '\0';
+
+    while(isspace(string[i])) i++;
+
+    if(string[i]!='\0') return false;
+
+    *integer = atoi(integer_buffer);
+
+    return true;
+}
+
+
