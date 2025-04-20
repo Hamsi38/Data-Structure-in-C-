@@ -6,6 +6,10 @@
 #include <string.h>
 
 #define BUFFER_SIZE 100
+#define GREEN "\033[1;32m"
+#define RED "\033[1;31m"
+#define RESET "\033[0m"
+#define CYAN "\033[1;36m"
 
 typedef struct Stack
 {
@@ -39,7 +43,7 @@ int Size_Stack(Stack*S);
 void Merge_Sort(int *arr,int left, int right );
 void Merge(int *arr, int left, int mid , int right);
 void Clear_All_Stack(Stack*S);
-int Binary_Search(Stack*S, int low , int high, int data);
+int Binary_Search(int*S, int low , int high, int data);
 void Reverse_Stack(Stack*S);
 void Insert_Bottom(Stack*S, int data);
 
@@ -62,21 +66,11 @@ int Max_Top(Min_Max*Max);
 
 bool parse_int(char*string, int*integer);
 void clear_input_buffer();
-
-int main(void){
-    Stack*S=Create();
-    Min_Max*Min= Create_Min_Max();
-    char buffer[BUFFER_SIZE];
-
-    int choice, push_value, binary_search;
-    bool end_program = true;
-    int binary, Popped_value;
-
-    do
-    {
-        //
-        int integer=0;//Sometimes integer might still hold a value from the previous loop.
+void Menu(){
+        printf(CYAN);
         printf("-----------MENU-----------\n");
+        printf(RESET);
+        printf(RED);
         printf("------- PUSH - 1 ---------\n");
         printf("--------- POP - 2 --------\n");
         printf("------ TOP ELEMENT - 3 ---\n");
@@ -90,7 +84,24 @@ int main(void){
         printf("------ SORTING - 11 ------\n");
         printf("----- DISPLAY - 12 -------\n");
         printf("-------- EXIT - 0 --------\n");
+        printf(RESET);
+        printf(GREEN);
         printf("ENTER YOUR CHOICE HERE ");
+}
+
+int main(void){
+    Stack*S=Create();
+    Min_Max*Min= Create_Min_Max();
+    char buffer[BUFFER_SIZE];
+
+    int choice, push_value, binary_search;
+    bool end_program = true;
+    int binary, Popped_value;
+
+    do
+    {
+        int integer=0;//Sometimes integer might still hold a value from the previous loop.
+        Menu();
         /*
         scanf leaves  new lien buffer because of that  
         in any switch case where is scanf it is gonna enter ht else part 
@@ -140,12 +151,15 @@ int main(void){
                 printf("Enter the value you want yo search in Stack -->");
                 scanf("%d",&binary_search);
                 clear_input_buffer();
-                Merge_Sort(S->arr, 0 , S->top);
-                binary = Binary_Search(S,0 ,S->top-1,binary_search);
+                int*temp = malloc((S->top +1)*sizeof(int));
+                memcpy(temp, S->arr,(S->top +1)*sizeof(int));
+                Merge_Sort(temp, 0 , S->top);
+                binary = Binary_Search(temp,0 ,S->top-1,binary_search);
+                free(temp);
                 if (binary == -1){
                     printf("SORRY the value you are looking is not in Stack\n\n");
                 }else{
-                    printf("the Value you are looking is at index %d \n\n",binary);
+                    printf("the Value you are looking is at index \n\n");
                 }
                 break;
             case 9:
@@ -250,12 +264,10 @@ void Display(Stack*S){
     }
     else{
         for (int i = S->top ; i >= 0 ; i--){
-            printf("[%d]\n",S->arr[i]);
+            printf("[%d]%s\n",S->arr[i], (i == S->top) ? "<-- Top":"");
         }
-        printf("Stack starts here\n");
     }
     printf("\n");
-    
 }
 
 int Pop(Stack*S){
@@ -340,13 +352,13 @@ void Clear_All_Stack(Stack*S){
     S->top = -1 ;
 }
 
-int Binary_Search(Stack*S, int low ,int high , int data){
+int Binary_Search(int*arr, int low ,int high , int data){
     while (low<=high){
         int mid = low  + (high - low )/2;
-        if(data == S->arr[mid]){
+        if(data == arr[mid]){
             return mid;
         }
-        if(data > S->arr[mid]){
+        if(data > arr[mid]){
             low = mid + 1;
         }
         else{
@@ -398,7 +410,7 @@ Min_Max * Create_Min_Max(){
 //! min functions here 
 void Min_Push(Min_Max*Min, int data){
     if(Min->Min_Top == -1 || Min->Min_Array[Min->Min_Top]> data){
-        if(Min->Min_Top == Min->Max_Capacity ){
+        if(Min->Min_Top == Min->Max_Capacity -1){
             Double_Min(Min);
         }
         Min->Min_Array[++Min->Min_Top] = data;
@@ -436,7 +448,7 @@ int Min_top(Min_Max*Min){
 //! max functions here
 void Max_Push(Min_Max*Max, int data){
     if(Max->Max_Top == -1 || Max->Max_Array[Max->Max_Top]< data){
-        if(Max->Max_Top == Max->Max_Capacity){
+        if(Max->Max_Top == Max->Max_Capacity -1){
             Double_Max(Max);
         }
         Max->Max_Array[++Max->Max_Top] = data;
@@ -540,7 +552,7 @@ bool parse_int(char*string, int*integer){
 
     return true;
 }
-
+// scanf generates \n because of that we must remove it otherwise it is a bug
 void clear_input_buffer(){
     int c;
     while((c = getchar())!= '\n' && c != EOF);
