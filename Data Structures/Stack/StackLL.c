@@ -3,43 +3,51 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 
 #define BLUE "\033[1;34m"
 #define MAGENTA "\033[1;35m"
 #define WHITE "\033[1;37m"
-#define RED "\033[1:31m"
+#define RED "\033[1;31m"
 #define RESET "\033[0m"
 
 #define BUFFER_SIZE 100
-#define empty -1
 
-typedef struct List
+typedef struct StackNode
 {
     int data;
-    struct List*next;
-}List;
+    struct StackNode*next;
+}StackNode;
+
+typedef struct Stack
+{
+    StackNode*top;
+    int size;
+}Stack;
+
+
+// we can't put isfull function because this is Stack is based on Linked list 
 
 // these are basic functions checking the value entered is integer or not
 //Display of our stack and Menu bar
-List*Create();
-void Push(List**Node, int data);
-int Pop(List**Node);
-List*Node_Maker(int data);
-void Clear();
+StackNode*Node_Maker(int data);
+void push(Stack*stack, int data);
+int pop(Stack*stack);
+bool isEmpty(Stack*stack);
+bool topEl(Stack*stack, int* topElement);
 
-
+void Clear(); 
 void Menu();
 bool parse_int(char*String, int *choice);
-void Display(List*head);
-void Integer_Checker();
+void Display(Stack*head);
 
 
 
 int main(void){
-    List*Top = Create();
-    int choice, push_value;
+    Stack stack = {NULL,0};
+    int choice, push_value, search_value, topElement = 0;
     char buffer[BUFFER_SIZE];
-    bool parse_condition, end_program;
+    bool parse_condition, end_program = true, is_empty;
 
     do
         {
@@ -55,35 +63,48 @@ int main(void){
                     printf("Enter your value to insert into stack : ");
                     scanf("%d",&push_value);
                     Clear();
-                    Push(&Top,push_value);
+                    push(&stack ,push_value);
                     break;
                 case 2:
-                    // printf("here is your Popped Value from Stack -->%d",);
+                    printf(BLUE"------------\nHere is your Popped Value from Stack -->%d\n\n"RESET,pop(&stack));
                     break;
-                case 10:
-                    printf("Here is your Stack based on LinkedList\n");
-                    Display(Top);
-                    printf("----------------");
+                case 3:
+                    if(topEl(&stack, &topElement)){
+                        printf(WHITE"Here is your Top element -->%d\n\n"RESET,topElement);
+                    }
+                    break;
+                case 4:
+                    is_empty = isEmpty(&stack);
+                    if(is_empty){
+                        printf("stack is empty insert element\n\n");
+                    }
+                    else if (!is_empty)
+                    {
+                        printf("Stack is not empty\n\n");
+                    }
+                    break;
+                case 5:
+                    printf("Size of Stack is --> %d\n",stack.size);
+                    break;
+
+                case 11:
+                    printf(WHITE"Here is your Stack based on LinkedList\n"RESET);
+                    Display(&stack);
                     break;
                 case 0:
-                    printf(RED);
-                    printf("Thx for using my program have a good day \n\n");
-                    printf(RESET);
+                    printf(RED"Thx for using my program have a good day \n\n"RESET);
                     end_program = false;
                     break;
+
                 default:
-                    printf(RED);
-                    printf("Please enter a number between 1 - 12 (include 1 and 12)\n and if you want to exit from program just enter 0\n\n ");
-                    printf(RESET);
+                    printf(RED"Please enter a number between 1 - 12 (include 1 and 12)\n and if you want to exit from program just enter 0\n\n "RESET);
                     break;
                 }
         }
         else{
-            printf(RED);
-            printf("---------------------------------\n");
+            printf(RED"---------------------------------\n");
             printf("INVALID INPUT PLEASE TRY AGAIN!!!\n");
-            printf("---------------------------------\n\n");
-            printf(RESET);
+            printf("---------------------------------\n\n"RESET);
         }
     } while (end_program);
     return 0;
@@ -91,28 +112,18 @@ int main(void){
 
 
 void Menu(){
-    printf(WHITE);
-    printf("--------MENU--------\n");
-    printf(RESET);
-    printf(MAGENTA);
-    printf("------- PUSH - 1 ---------\n");
+    printf(WHITE"--------MENU--------\n"RESET);
+    printf(MAGENTA"------- PUSH - 1 ---------\n");
     printf("--------- POP - 2 --------\n");
     printf("------ TOP ELEMENT - 3 ---\n");
     printf("-------- IS EMPTY - 4 ----\n");
-    printf("--------- IS FULL - 5 ----\n");
-    printf("--------- SIZE - 6 -------\n");
-    printf("--- CLEAR ALL STACK - 7 --\n");
-    printf("---- SEARCH IN STACK - 8 -\n");
-    printf("--- REVERSE STACK - 9 ----\n");
-    printf("--- MIN and MAX - 10 -----\n");
-    printf("------ SORTING - 11 ------\n");
-    printf("----- DISPLAY - 12 -------\n");
-    printf("-------- EXIT - 0 --------\n");
-    printf(RESET);
-}
-
-List*Create(){
-    return NULL;
+    printf("--------- SIZE - 5 -------\n");
+    printf("---- SEARCH IN STACK - 6 -\n");
+    printf("--- REVERSE STACK - 7 ----\n");
+    printf("--- MIN and MAX - 8 ------\n");
+    printf("------ SORTING - 9 -------\n");
+    printf("----- DISPLAY - 10 -------\n");
+    printf("-------- EXIT - 0 --------\n"RESET);
 }
 
 bool parse_int(char*string, int*data){
@@ -134,42 +145,36 @@ bool parse_int(char*string, int*data){
     while (i<len && !isspace(string[i])){
         integer_buffer[integer_chars++] = string[i++];
     }
-    integer_buffer[i] = '\0';
+    integer_buffer[integer_chars] = '\0';
     while(isspace(string[i])) i++;
     if(string[i] != '\0') return false; 
     *data = atoi(integer_buffer);
     return true;
 }
 
-//* this is the insert at begin in Linked list 
-// this works for empty and non empty stack 
-void Push(List**Node, int data){
-    List*new = Node_Maker(data);
-    new->next=*Node;
-    *Node=new;
-}
-
-void Display(List*head){
-    List*temp=head;
-    if(temp==NULL){
-        printf("Stack is empty\n\n");
+void Display(Stack*stack){
+    if(stack==NULL){
+        printf(RED"Stack is empty\n"RESET);
         return;
     }
-    printf("Stack from Top to Bottom\n");
-    printf("┌───────────┐\n");
+    StackNode*temp=stack->top;
+    printf(BLUE"Stack from Top to Bottom\n"RESET);
+    printf("     ┌──────────────┐\n");
     while(temp!=NULL){
-        printf("|    %d     |\n",temp->data);
-        printf("_____________\n");
+        printf("     |     %d      |   \n",temp->data);
+        if (temp->next){
+            printf("     ├──────▼─────┤\n");
+        }
         temp=temp->next;
     }
-    printf("|___________|\n\n");
+    printf("     └──────────────┘\n\n");
 }
 
-List*Node_Maker(int data){
-    List*newNode = (List*)malloc(sizeof(List));
+StackNode*Node_Maker(int data){
+    StackNode*newNode = (StackNode*)malloc(sizeof(StackNode));
     if(newNode==NULL){
         printf("List empty Error\n\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     newNode->data=data;
     newNode->next=NULL;
@@ -181,7 +186,33 @@ void Clear(){
     while((c = getchar())!= '\n' && c != EOF);
 }
 
+bool isEmpty(Stack*stack){
+    return stack->top == NULL;
+}
 
+void push(Stack*stack, int data){
+    StackNode*newNode = Node_Maker(data);
+    newNode->next = stack->top;
+    stack->top=newNode;
+    stack->size++;
+}
 
+int pop(Stack*stack){
+    if(isEmpty(stack)) return INT_MIN;
+    StackNode*temp  = stack->top;
+    int data  = temp->data;
+    stack->top=temp->next;
+    free(temp);
+    stack->size--;
+    return data;
+}
 
+bool topEl(Stack*stack, int* topElement){
+    if (stack==NULL || stack->top ==NULL){
+        printf(RED"Stack is empty\n\n"RESET);
+        return false;
+    }
+    *topElement = stack->top->data;
+    return true; 
+}
 
