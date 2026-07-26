@@ -35,6 +35,7 @@ void push(Stack*stack, int data);
 int pop(Stack*stack);
 bool isEmpty(Stack*stack);
 bool topEl(Stack*stack, int* topElement);
+void search_el(Stack*stack, int n);
 
 void Clear(); 
 void Menu();
