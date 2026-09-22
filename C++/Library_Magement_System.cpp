@@ -153,7 +153,7 @@ void display_all_books()
     else
     {
         cout<<YELLOW;
-        for (int i = 0; i < V.size(); i++)
+        for (size_t i = 0; i < V.size(); i++)
         {
             cout<<"Book's name = "<<V[i].book_name<<endl;
             cout<<"Author = "<<V[i].author<<endl;
@@ -328,7 +328,7 @@ void search_book(string search_str)
 
 bool is_book_avaible(const string & search_str)
 {
-    for (int i = 0; i < V.size(); i++)
+    for (size_t i = 0; i < V.size(); i++)
     {
         if(V[i].book_name == search_str)
         {
@@ -363,7 +363,7 @@ void borrow_book(string  borrow_book_str)
             answer_ys = lower_string(answer_ys);
             if (answer_ys=="yes")
             {
-                for(int i = 0; i < V.size(); i++)
+                for(size_t i = 0; i < V.size(); i++)
                 {
                     if(V[i].book_name==borrow_book_str)
                     {
@@ -391,7 +391,7 @@ void borrow_book(string  borrow_book_str)
 bool is_book_borrowed(string & borrow_book_str)
 {
     borrow_book_str = lower_string(borrow_book_str);
-    for (int i = 0; i < V.size(); i++)
+    for (size_t i = 0; i < V.size(); i++)
     {
         if (V[i].book_name== borrow_book_str)
         {
@@ -427,7 +427,7 @@ void update_book()
         }
         else
         {
-            for (int i = 0; i < V.size(); i++)
+            for (size_t i = 0; i < V.size(); i++)
             {
                 if(update_book_name == V[i].book_name)
                 {
@@ -490,7 +490,7 @@ string lower_string(string must_lower)
 
 bool delete_book(string str)
 {
-    for (int i = 0; i < V.size(); i++)
+    for (size_t i = 0; i < V.size(); i++)
     {
         if(V[i].book_name==str)
         {
@@ -566,4 +566,20 @@ void all_borrowed_books()
         }
     }
     cout<<RESET<<endl;
+}
+
+void sort_vector()
+{
+    string str;
+    cout<<YELLOW;
+    cout<<"1 for page number"<<endl<<"2 for price"<<endl;
+    cout<<"How do you want to sort the list? by page nr, price"<<endl;
+    cout<<"Enter your answer here --> ";
+    getline(cin,str);
+    if ()
+    {
+        /* code */
+    }
+    
+
 }
